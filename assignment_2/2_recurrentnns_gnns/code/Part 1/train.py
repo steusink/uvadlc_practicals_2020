@@ -73,7 +73,7 @@ def train(config):
     elif config.dataset == "bss":
         print("Load bss dataset ...")
         # Initialize the dataset and data loader
-        config.num_classes = config.input_length
+        config.num_classes = 2
         config.input_dim = 3
         dataset = datasets.BaumSweetSequenceDataset(config.input_length)
         data_loader = DataLoader(
