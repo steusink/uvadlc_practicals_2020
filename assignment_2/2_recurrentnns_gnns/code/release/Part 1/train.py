@@ -46,7 +46,7 @@ import math
 
 def kaiming_init(model):
     for name, param in model.named_parameters():
-        if name.startswith("b"):
+        if name.endswith("b"):
             param.data.fill_(0)
         else:
             param.data.normal_(0, math.sqrt(2) / math.sqrt(param.shape[1]))
@@ -279,7 +279,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--device",
         type=str,
-        default="cpu",
+        default="cuda:0",
         help="Training device 'cpu' or 'cuda:0'",
     )
     parser.add_argument(

@@ -38,26 +38,26 @@ class LSTM(nn.Module):
         # Create the weight matrices and bias vectors. We will concatenate x
         # and h when forwarding through the memory cell, which is why the
         # second dim is set to input_dim + hidden_dim.
-        self.w_g = nn.Parameter(
+        self.g_w = nn.Parameter(
             torch.empty(hidden_dim, input_dim + hidden_dim)
         )
-        self.w_i = nn.Parameter(
+        self.i_w = nn.Parameter(
             torch.empty(hidden_dim, input_dim + hidden_dim)
         )
-        self.w_f = nn.Parameter(
+        self.f_w = nn.Parameter(
             torch.empty(hidden_dim, input_dim + hidden_dim)
         )
-        self.w_o = nn.Parameter(
+        self.o_w = nn.Parameter(
             torch.empty(hidden_dim, input_dim + hidden_dim)
         )
-        self.b_g = nn.Parameter(torch.empty(hidden_dim))
-        self.b_i = nn.Parameter(torch.empty(hidden_dim))
-        self.b_f = nn.Parameter(torch.empty(hidden_dim))
-        self.b_o = nn.Parameter(torch.empty(hidden_dim))
+        self.g_b = nn.Parameter(torch.empty(hidden_dim))
+        self.i_b = nn.Parameter(torch.empty(hidden_dim))
+        self.f_b = nn.Parameter(torch.empty(hidden_dim))
+        self.o_b = nn.Parameter(torch.empty(hidden_dim))
 
         # Last we define the weights and bias for the prediction layer.
-        self.w_p = nn.Parameter(torch.empty(num_classes, hidden_dim))
-        self.b_p = nn.Parameter(torch.empty(num_classes))
+        self.p_w = nn.Parameter(torch.empty(num_classes, hidden_dim))
+        self.p_b = nn.Parameter(torch.empty(num_classes))
 
     def cell_forward(self, x, c, h):
         # Concetenate input vector x and hidden layer h
@@ -66,10 +66,10 @@ class LSTM(nn.Module):
         # Perform forward pass through all gates by matrix multiplying
         # the weight matrix and x_h vector, adding the bias and applying
         # the corresponding activation function.
-        g = torch.tanh(x_h @ self.w_g.T + self.b_g)
-        i = torch.sigmoid(x_h @ self.w_i.T + self.b_i)
-        f = torch.sigmoid(x_h @ self.w_f.T + self.b_f)
-        o = torch.sigmoid(x_h @ self.w_o.T + self.b_o)
+        g = torch.tanh(x_h @ self.g_w.T + self.g_b)
+        i = torch.sigmoid(x_h @ self.i_w.T + self.i_b)
+        f = torch.sigmoid(x_h @ self.f_w.T + self.f_b)
+        o = torch.sigmoid(x_h @ self.o_w.T + self.o_b)
 
         # Compute new cell state and use it to compute
         # the new hidden state.
@@ -92,9 +92,9 @@ class LSTM(nn.Module):
             # Get the sequence batch from the ith timestep
             # and reshape it to allign with the shape of h.
             t = embeds[:, i, :]
-            h, c = self.cell_forward(t, h, c)
+            c, h = self.cell_forward(t, c, h)
 
         # Use the final hidden state for prediction
-        preds = F.softmax(h @ self.w_p.T + self.b_p, dim=1)
+        preds = F.log_softmax(h @ self.p_w.T + self.p_b, dim=1)
 
         return preds
