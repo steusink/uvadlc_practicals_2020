@@ -1,0 +1,134 @@
+WARNING: $PATH does not agree with $PATH_modshare counter. The following directories' usage counters were adjusted to match. Note that this may mean that module unloading may not work correctly.
+ /opt/slurm/bin /hpc/eb/compilerwrappers/linkers /usr/games /usr/bin/X11 /opt/slurm/sbin /hpc/eb/compilerwrappers/compilers /usr/sara/bin /opt/slurm/sw/current/bin
+Initialize dataset with 540241 characters, 87 unique.
+device = cuda
+Model 1/3
+Sequences of length  15
+Sample 1
+/home/lgpu0395/.conda/envs/dl2020/lib/python3.7/site-packages/torch/nn/modules/rnn.py:577: UserWarning: RNN module weights are not part of single contiguous chunk of memory. This means they need to be compacted at every call, possibly greatly increasing memory usage. To compact weights again call flatten_parameters(). (Triggered internally at  /opt/conda/conda-bld/pytorch_1595629403081/work/aten/src/ATen/native/cudnn/RNN.cpp:1264.)
+  self.dropout, self.training, self.bidirectional, self.batch_first)
+zed and said, ‘I
+Sample 2
+1.  The first pa
+Sample 3
+#intended for a 
+Sample 4
+I am a poor chil
+Sample 5
+E FISHERMAN AND 
+Sequences of length  30
+Sample 1
+But the mother said, ‘I will gi
+Sample 2
+4.  If the first princess of fi
+Sample 3
+00) are once more to your fortu
+Sample 4
+﻿they could not see him a long 
+Sample 5
+nd the second son said, ‘I will
+Sequences of length  45
+Sample 1
+. And as he could not see him a long time to t
+Sample 2
+the second son said, ‘I will give you a long t
+Sample 3
+] and the second son said, ‘I will give you a 
+Sample 4
+$1 the fox and Gretel promised to see the fox 
+Sample 5
+#intended for a long time the mouse and the st
+Model 2/3
+Sequences of length  15
+Sample 1
+.’ The little ma
+Sample 2
+And the soldier 
+Sample 3
+Cat-skin, you sh
+Sample 4
+ing a little whi
+Sample 5
+very day.
+
+
+
+
+TH
+Sequences of length  30
+Sample 1
+#2.  In 2001, there was once a 
+Sample 2
+ple with the parlour
+to be aske
+Sample 3
+?’ ‘I bring nothing, but we mus
+Sample 4
+’ The little tailor went his fi
+Sample 5
+nd the princess was so that the
+Sequences of length  45
+Sample 1
+[LITTLE RED RIDING HOOD]
+
+Once when the mother
+Sample 2
+But the princess was all spun into the water, 
+Sample 3
+be a fine thing as before; and as he was about
+Sample 4
+the fire and said: ‘I will give you a box on t
+Sample 5
+I will give you a box on the star-gazer. It is
+Model 3/3
+Sequences of length  15
+Sample 1
+
+
+The bird flew 
+Sample 2
+712., but its ne
+Sample 3
+] and was tired,
+Sample 4
+Queen to the tab
+Sample 5
+I will go to my 
+Sequences of length  30
+Sample 1
+6-185---Carriage witch told me 
+Sample 2
+And then they went to the barga
+Sample 3
+Queen to the table was luck; an
+Sample 4
+0% of the Project Gutenberg” ap
+Sample 5
+. Then the king had the straw
+t
+Sequences of length  45
+Sample 1
+VEN IF YOU GIVE NOTICE OF THE GOLDEN GOOSE
+   
+Sample 2
+/www.gutenberg.org
+
+
+And Chanticleer and Partl
+Sample 3
+She lailed himself in the water, and the witch
+Sample 4
+ROJECT GRETEL
+
+There was once a man took any p
+Sample 5
+very day, and said, ‘I will not be able to set
+Start Random Sampling
+temp =  0.5
+Gnow.’ Bell! I- Whensolecter yet, crasknth, la
+temp =  1.0
+% OF CLEVER GRETEL
+
+The mother lived. Dummling
+temp =  2.0
+could not find it is to say or a boy,’ answere
