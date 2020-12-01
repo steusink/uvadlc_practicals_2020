@@ -25,6 +25,7 @@ from datetime import datetime
 import torch
 import torch.optim as optim
 from torch.utils.data import DataLoader
+import pickle
 
 # datasets
 import datasets
@@ -144,6 +145,11 @@ def train(config):
     # Setup the loss and optimizer
     loss_function = torch.nn.NLLLoss()
     optimizer = optim.Adam(model.parameters(), lr=config.learning_rate)
+    average_loss = 0
+
+    # Initialise loss and accuracy lists
+    loss_list = []
+    accuracy_list = []
 
     for step, (batch_inputs, batch_targets) in enumerate(data_loader):
 
@@ -163,6 +169,7 @@ def train(config):
         # Compute the loss, gradients and update network parameters
         loss = loss_function(log_probs, batch_targets)
         loss.backward()
+        average_loss += loss / 60
 
         #######################################################################
         # Check for yourself: what happens here and why?
@@ -199,6 +206,8 @@ def train(config):
                     loss,
                 )
             )
+            accuracy_list.append(accuracy)
+            loss_list.append(loss)
 
         # Check if training is finished
         if step == config.train_steps:
@@ -207,6 +216,14 @@ def train(config):
             break
 
     print("Done training.")
+
+    # Save accuracy and loss
+    results_dict = {loss: loss_list, accuracy: accuracy_list}
+    path = "results/results_{}_{}.pickle".format(
+        config.model_type, config.input_length
+    )
+    with open(path, "rb") as f:
+        pickle.dump(results_dict, f)
     ###########################################################################
     ###########################################################################
 
@@ -228,7 +245,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--model_type",
         type=str,
-        default="biLSTM",
+        default="LSTM",
         choices=["LSTM", "biLSTM", "GRU", "peepLSTM"],
         help="Model type: LSTM, biLSTM, GRU or peepLSTM",
     )
@@ -253,7 +270,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--num_hidden",
         type=int,
-        default=256,
+        default=128,
         help="Number of hidden units in the model",
     )
 
@@ -261,7 +278,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--batch_size",
         type=int,
-        default=256,
+        default=128,
         help="Number of examples to process in a batch",
     )
     parser.add_argument(
@@ -270,7 +287,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--train_steps",
         type=int,
-        default=3000,
+        default=2000,
         help="Number of training steps",
     )
     parser.add_argument("--max_norm", type=float, default=10.0)
