@@ -90,7 +90,10 @@ def train(config):
         # Compute the loss, gradients and update the network parameters
         loss = 0
         for t in range(config.seq_length):
-            loss += criterion(log_probs_list[t], batch_targets[t])
+            loss += (
+                criterion(log_probs_list[t], batch_targets[t])
+                / config.seq_length
+            )
 
         # Add to average loss
         average_loss += loss / config.print_every

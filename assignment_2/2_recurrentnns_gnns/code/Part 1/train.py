@@ -53,9 +53,10 @@ def kaiming_init(model):
             param.data.normal_(0, math.sqrt(2) / math.sqrt(param.shape[1]))
 
 
-def train(config):
-    np.random.seed(0)
-    torch.manual_seed(0)
+def train(config, seed):
+    # Set seeds
+    np.random.seed(seed)
+    torch.manual_seed(seed)
 
     # Initialize the device which to run the model on
     device = torch.device(config.device)
@@ -217,13 +218,8 @@ def train(config):
 
     print("Done training.")
 
-    # Save accuracy and loss
-    results_dict = {loss: loss_list, accuracy: accuracy_list}
-    path = "results/results_{}_{}.pickle".format(
-        config.model_type, config.input_length
-    )
-    with open(path, "rb") as f:
-        pickle.dump(results_dict, f)
+    # Return loss and accuracy lists
+    return loss_list, accuracy_list
     ###########################################################################
     ###########################################################################
 
@@ -320,8 +316,20 @@ if __name__ == "__main__":
 
     config = parser.parse_args()
 
-    # Train the model
-    train(config)
+    # Initialise accuracy lists and loss lists for saving
+    accuracy_list, loss_list = [], []
 
-    np.random.seed(0)
-    torch.manual_seed(0)
+    # Train the model for three different seeds
+    for i in range(3):
+        print("Training {}th model".format(i + 1))
+        loss, accuracy = train(config, i)
+        loss_list.append(loss), accuracy_list.append(accuracy)
+
+    results_dict = {"loss": loss_list, "accuracy": accuracy_list}
+    path = "results/results_{}_{}.pickle".format(
+        config.model_type, config.input_length
+    )
+    with open(path, "wb") as f:
+        pickle.dump(results_dict, f)
+
+    # Done
