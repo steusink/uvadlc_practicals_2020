@@ -20,8 +20,9 @@ import numpy as np
 
 
 class MLPEncoder(nn.Module):
-
-    def __init__(self, input_dim=784, hidden_dims=[512], z_dim=20):
+    def __init__(
+        self, input_dim=784, hidden_dims=[512], z_dim=20, act_fun=nn.ReLU()
+    ):
         """
         Encoder with an MLP network and ReLU activations (except the output layer).
 
@@ -34,9 +35,22 @@ class MLPEncoder(nn.Module):
         super().__init__()
 
         # For an intial architecture, you can use a sequence of linear layers and ReLU activations.
-        # Feel free to experiment with the architecture yourself, but the one specified here is 
+        # Feel free to experiment with the architecture yourself, but the one specified here is
         # sufficient for the assignment.
-        raise NotImplementedError
+        dims = [input_dim] + hidden_dims
+        layers = []
+
+        # Loop over dimension pairs and add linear modules + act function
+        for m, n in zip(dims, dims[1:]):
+            layers.append(nn.Linear(m, n))
+            layers.append(act_fun)
+
+        # Add last linear layer, with twice the z_direction for both the
+        # mean and the variance.
+        layers.append(nn.Linear(hidden_dims[-1], 2 * z_dim))
+
+        # Add all layers to the model
+        self.network = nn.Sequential(*layers)
 
     def forward(self, x):
         """
@@ -49,15 +63,24 @@ class MLPEncoder(nn.Module):
         """
 
         # Remark: Make sure to understand why we are predicting the log_std and not std
-        mean = None
-        log_std = None
-        raise NotImplementedError
+        out = self.network(torch.flatten(x, start_dim=1))
+
+        # The mean and standard deviation are predicted by half of the output neurons
+        z_dim = int(out.size(1) / 2)
+        mean = out[:, :z_dim]
+        log_std = out[:, z_dim:]
+
         return mean, log_std
 
 
 class MLPDecoder(nn.Module):
-
-    def __init__(self, z_dim=20, hidden_dims=[512], output_shape=[1, 28, 28]):
+    def __init__(
+        self,
+        z_dim=20,
+        hidden_dims=[512],
+        output_shape=[1, 28, 28],
+        act_fun=nn.ReLU(),
+    ):
         """
         Decoder with an MLP network.
         Inputs:
@@ -71,9 +94,23 @@ class MLPDecoder(nn.Module):
         self.output_shape = output_shape
 
         # For an intial architecture, you can use a sequence of linear layers and ReLU activations.
-        # Feel free to experiment with the architecture yourself, but the one specified here is 
+        # Feel free to experiment with the architecture yourself, but the one specified here is
         # sufficient for the assignment.
-        raise NotImplementedError
+        dims = [z_dim] + hidden_dims
+        layers = []
+
+        # Loop over dimension pairs and add linear modules + act function
+        for m, n in zip(dims, dims[1:]):
+            layers.append(nn.Linear(m, n))
+            layers.append(act_fun)
+
+        # Add last linear layer, with twice the z_direction for both the
+        # mean and the variance.
+        output_dim = np.prod(output_shape)
+        layers.append(nn.Linear(hidden_dims[-1], output_dim))
+
+        # Add all layers to the model
+        self.network = nn.Sequential(*layers)
 
     def forward(self, z):
         """
@@ -84,9 +121,12 @@ class MLPDecoder(nn.Module):
                 This should be a logit output *without* a sigmoid applied on it.
                 Shape: [B,output_shape[0],output_shape[1],output_shape[2]]
         """
+        # Perform forward pass through layers and return
+        # the correct shape
+        x = self.network(z)
+        shape = [len(z)] + self.output_shape
+        x = x.reshape(shape)
 
-        x = None
-        raise NotImplementedError
         return x
 
     @property
