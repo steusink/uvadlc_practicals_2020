@@ -34,7 +34,7 @@ def sample_reparameterize(mean, std):
             The tensor should have the same shape as the mean and std input tensors.
     """
     # Sample from simple gaussian
-    eps = torch.randn(mean.shape)
+    eps = torch.randn_like(mean)
 
     # Compute sample via reparameterisation trick
     z = mean + eps * std
@@ -94,7 +94,22 @@ def visualize_manifold(decoder, grid_size=20):
     # - You can use torchvision's function "make_grid" to combine the grid_size**2 images into a grid
     # - Remember to apply a sigmoid after the decoder
 
-    img_grid = None
-    raise NotImplementedError
+    # Get tensor with percentile range
+    percentile_range = torch.linspace(
+        0.5 / (grid_size + 1),
+        (grid_size + 0.5) / (grid_size + 1),
+        grid_size,
+    ).to(decoder.device)
+    # Create grid for both z dimensions
+    z1_grid, z2_grid = torch.meshgrid(percentile_range, percentile_range)
+
+    # Stack flattened grids in z_dim dimension
+    z_batch = torch.stack((z1_grid.flatten(), z2_grid.flatten()), dim=1)
+
+    # Run through decoder
+    mean_batch = decoder(z_batch)
+
+    # Create image grid
+    img_grid = make_grid(mean_batch, nrow=grid_size)
 
     return img_grid

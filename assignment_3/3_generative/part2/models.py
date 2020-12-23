@@ -20,8 +20,13 @@ import numpy as np
 
 
 class GeneratorMLP(nn.Module):
-
-    def __init__(self, z_dim=32, hidden_dims=[128, 256, 512, 1024], output_shape=[1, 28, 28], dp_rate=0.1):
+    def __init__(
+        self,
+        z_dim=32,
+        hidden_dims=[128, 256, 512, 1024],
+        output_shape=[1, 28, 28],
+        dp_rate=0.1,
+    ):
         """
         Generator network with linear layers, LeakyReLU activations (alpha=0.2) and dropout. The output layer
         uses a Tanh activation function to scale the output between -1 and 1.
@@ -38,7 +43,24 @@ class GeneratorMLP(nn.Module):
         # You are allowed to experiment with the architecture and change the activation function, normalization, etc.
         # However, the default setup is sufficient to generate fine images and gain full points in the assignment.
         # The default setup is a sequence of Linear, Dropout, LeakyReLU (alpha=0.2)
-        raise NotImplementedError
+
+        # Save output shape for forward function
+        self.output_shape = output_shape
+
+        # Construct linear layers, dropout and leaky ReLUs
+        layers = []
+        dims = [z_dim] + hidden_dims
+        for m, n in zip(dims, dims[1:]):
+            layers += [nn.Linear(m, n)]
+            layers += [nn.Dropout(p=dp_rate)]
+            layers += [nn.LeakyReLU(0.2)]
+
+        # Add last linear layer
+        layers += [nn.Linear(hidden_dims[-1], np.prod(output_shape))]
+        layers += [nn.Tanh()]
+
+        # Combine
+        self.network = nn.Sequential(*layers)
 
     def forward(self, z):
         """
@@ -47,8 +69,12 @@ class GeneratorMLP(nn.Module):
         Outputs:
             x - Generated image of shape [B,output_shape[0],output_shape[1],output_shape[2]]
         """
-        x = None
-        raise NotImplementedError
+
+        # Construct the correct shape and obtain x
+        # by passing latent vectors through the network
+        target_shape = [len(z)] + self.output_shape
+        x = self.network(z).reshape(target_shape)
+
         return x
 
     @property
@@ -60,14 +86,13 @@ class GeneratorMLP(nn.Module):
 
 
 class DiscriminatorMLP(nn.Module):
-
     def __init__(self, input_dims=784, hidden_dims=[512, 256], dp_rate=0.3):
         """
         Discriminator network with linear layers, LeakyReLU activations (alpha=0.2) and dropout.
 
         Inputs:
             input_dims - Number of input neurons/pixels. For MNIST, 28*28=784
-            hidden_dims - List of dimensionalities of the hidden layers in the network. 
+            hidden_dims - List of dimensionalities of the hidden layers in the network.
                           The NN should have the same number of hidden layers as the length of the list.
             dp_rate - Dropout probability to apply after every linear layer except the output.
         """
@@ -75,7 +100,20 @@ class DiscriminatorMLP(nn.Module):
         # You are allowed to experiment with the architecture and change the activation function, normalization, etc.
         # However, the default setup is sufficient to generate fine images and gain full points in the assignment.
         # The default setup is the same as the generator: a sequence of Linear, Dropout, LeakyReLU (alpha=0.2)
-        raise NotImplementedError
+
+        # Construct linear layers, dropout and leaky ReLUs
+        layers = []
+        dims = [input_dims] + hidden_dims
+        for m, n in zip(dims, dims[1:]):
+            layers += [nn.Linear(m, n)]
+            layers += [nn.Dropout(p=dp_rate)]
+            layers += [nn.LeakyReLU(0.2)]
+
+        # Add last linear layer
+        layers += [nn.Linear(hidden_dims[-1], 1)]
+
+        # Combine
+        self.network = nn.Sequential(*layers)
 
     def forward(self, x):
         """
@@ -86,6 +124,6 @@ class DiscriminatorMLP(nn.Module):
                     Note that this should be a logit output *without* a sigmoid applied on it.
                     Shape: [B,1]
         """
-        preds = None
-        raise NotImplementedError
+        preds = self.network(x.flatten(start_dim=1))
+
         return preds

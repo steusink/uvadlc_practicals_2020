@@ -20,6 +20,7 @@ import datetime
 import statistics
 import random
 import math
+import pickle
 
 from tqdm import tqdm, trange
 import numpy as np
@@ -170,8 +171,8 @@ def test_vae(model, data_loader):
     average_reg_loss = 0
     batches = 0
 
-    for imgs in data_loader:
-        imgs = imgs[0].to(model.device)
+    for imgs, _ in data_loader:
+        imgs = imgs.to(model.device)
         l_rec, l_reg, bpd = model(imgs)
         average_bpd += bpd
         average_rec_loss += l_rec
@@ -204,14 +205,14 @@ def train_vae(model, train_loader, optimizer):
     batches = 0
 
     # Loop over data and perform training
-    for imgs in train_loader:
-        imgs = imgs[0].to(model.device)
+    for imgs, _ in train_loader:
+        imgs = imgs.to(model.device)
+
         # Ensure 0 gradients
         model.zero_grad()
 
         # Forward pass
         l_rec, l_reg, bpd = model(imgs)
-        print(bpd)
         # Update losses
         average_bpd += bpd
         average_rec_loss += l_rec
@@ -292,6 +293,10 @@ def main(args):
     # Sample image grid before training starts
     sample_and_save(model, 0, summary_writer, 64)
 
+    # Loss lists for plotting
+    train_bpds = []
+    val_bpds = []
+
     # Tracking variables for finding best model
     best_val_bpd = float("inf")
     best_epoch_idx = 0
@@ -310,6 +315,7 @@ def main(args):
         epoch_train_bpd, train_rec_loss, train_reg_loss = train_vae(
             model, train_iterator, optimizer
         )
+        train_bpds.append(epoch_train_bpd)
         print(
             "epoch: {}, train bpd: {}, train rec loss: {}, train reg loss: {}".format(
                 epoch, epoch_train_bpd, train_rec_loss, train_reg_loss
@@ -324,6 +330,7 @@ def main(args):
         epoch_val_bpd, val_rec_loss, val_reg_loss = test_vae(
             model, val_iterator
         )
+        val_bpds.append(epoch_val_bpd)
 
         # Logging to TensorBoard
         summary_writer.add_scalars(
@@ -369,9 +376,18 @@ def main(args):
         if args.progress_bar
         else test_loader
     )
-    _, _, test_bpd = test_vae(model, test_loader)
+    test_bpd, _, _ = test_vae(model, test_loader)
     print(f"Test BPD: {test_bpd}")
     summary_writer.add_scalars("BPD", {"test": test_bpd}, args.epochs - 1)
+
+    results_path = "{}/results_{}.pickle".format(args.log_dir, args.z_dim)
+    results = {
+        "val_loss": val_bpds,
+        "train_loss": train_bpds,
+        "test_loss": test_bpd,
+    }
+    with open(results_path, "wb") as f:
+        pickle.dump(results, f)
 
     # Manifold generation
     if args.z_dim == 2:
